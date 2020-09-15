@@ -8,7 +8,13 @@ import androidx.annotation.Nullable;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 1;
+    public static final int DB_VERSION = 1;
+
+    public static final String TABLE_IMAGES = "images";
+
+    public static final String KEY_ID = "id";
+    public static final String KEY_NAME = "name";
+    public static final String KEY_PATH = "path";
 
     public DBHelper(@Nullable Context context, @Nullable String name, int version) {
         super(context, name, null, DB_VERSION);
@@ -16,10 +22,10 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table photos (" +
-                "id INTEGER PRIMARY KEY," +
-                "name TEXT," +
-                "path TEXT)");
+        db.execSQL("create table " + TABLE_IMAGES + " (" +
+                KEY_ID + " INTEGER PRIMARY KEY," +
+                KEY_NAME + " TEXT," +
+                KEY_PATH + " TEXT)");
     }
 
     @Override
