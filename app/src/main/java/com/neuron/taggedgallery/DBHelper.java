@@ -21,7 +21,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String KEY_NAME = "name";
     public static final String KEY_PATH = "path";
 
-    public DBHelper(@Nullable Context context, @Nullable String name, int version) {
+    public DBHelper(@Nullable Context context, @Nullable String name) {
         super(context, name, null, DB_VERSION);
     }
 
@@ -40,11 +40,13 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("create table " + TABLE_TAGMAP + " (" +
                 KEY_TAGMAP_ID + " INTEGER PRIMARY KEY," +
                 KEY_TAG_ID + " INTEGER," +
-                KEY_IMAGE_ID + " INTEGER," +
-                KEY_NAME + " TEXT)");
+                KEY_IMAGE_ID + " INTEGER)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DELETE FROM " + TABLE_IMAGES);
+        db.execSQL("DELETE FROM " + TABLE_TAGS);
+//        db.execSQL("DELETE FROM " + TABLE_TAGMAP);
     }
 }

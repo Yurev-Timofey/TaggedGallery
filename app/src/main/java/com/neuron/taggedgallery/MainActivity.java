@@ -11,21 +11,92 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-//INSERT INTO images (file_path, name) VALUES ("your file path", "name of image");
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static final int PICK_IMAGE = 1;
 
     DBHelper dbHelper;
-    ImageView imageView;
+    SQLiteDatabase database;
+
+    LinearLayout llMain;
+    Button btnCreate;
+    Button btnClear;
+    ImageView lastImg;
+
+    int wrapContent = LinearLayout.LayoutParams.WRAP_CONTENT;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        llMain = findViewById(R.id.llPictures);
+
+        btnCreate = findViewById(R.id.btnCreate);
+        btnCreate.setOnClickListener(this);
+
+        btnClear = findViewById(R.id.btnClear);
+        btnClear.setOnClickListener(this);
+
+        dbHelper = new DBHelper(this, "db");
+        database = dbHelper.getWritableDatabase();
+
+//        Button PickImage = (Button) findViewById(R.id.button);
+//        PickImage.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View view) {
+//
+//                //Вызываем стандартную галерею для выбора изображения с помощью Intent.ACTION_PICK:
+//                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+//                //Тип получаемых объектов - image:
+//                photoPickerIntent.setType("image/*");
+//                //Запускаем переход с ожиданием обратного результата в виде информации об изображении:
+//                startActivityForResult(photoPickerIntent, PICK_IMAGE);
+//            }
+//        });
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btnCreate:
+                // Создание LayoutParams c шириной и высотой по содержимому
+                LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(
+                        300, 300);
+                lParams.gravity = Gravity.START;
+//                lParams.width = 150;
+//                lParams.height = 150;
+
+                lastImg = new ImageView(this);
+                llMain.addView(lastImg, lParams);
+
+                //Вызываем стандартную галерею для выбора изображения с помощью Intent.ACTION_PICK:
+                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+                //Тип получаемых объектов - image:
+                photoPickerIntent.setType("image/*");
+                //Запускаем переход с ожиданием обратного результата в виде информации об изображении:
+                startActivityForResult(photoPickerIntent, PICK_IMAGE);
+                break;
+
+            case R.id.btnClear:
+                llMain.removeAllViews();
+                dbHelper.onUpgrade(database, 1, 2);
+                Toast.makeText(this, "Удалено", Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -34,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case PICK_IMAGE:
                 if (resultCode == RESULT_OK) {
-                    SQLiteDatabase database = dbHelper.getWritableDatabase();
 
                     ContentValues contentValues = new ContentValues();
 //                    System.out.println(data.getDataString());
@@ -51,47 +121,14 @@ public class MainActivity extends AppCompatActivity {
                             final Uri imageUri = Uri.parse(cursor.getString(cursor.getColumnIndex(DBHelper.KEY_NAME)));
                             final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                             final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                            imageView.setImageBitmap(selectedImage);
+                            lastImg.setImageBitmap(selectedImage);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
                         }
                     }
-
-//                    try {
-//                        final Uri imageUri = data.getData();
-//                        final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-//                        final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-//                        imageView.setImageBitmap(selectedImage);
-//                    } catch (FileNotFoundException e) {
-//                        e.printStackTrace();
-//                    }
+                    cursor.close();
                 }
         }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        imageView = (ImageView) findViewById(R.id.imageView);
-
-        dbHelper = new DBHelper(this, "db", 1);
-
-
-        Button PickImage = (Button) findViewById(R.id.button);
-        PickImage.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-
-                //Вызываем стандартную галерею для выбора изображения с помощью Intent.ACTION_PICK:
-                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                //Тип получаемых объектов - image:
-                photoPickerIntent.setType("image/*");
-                //Запускаем переход с ожиданием обратного результата в виде информации об изображении:
-                startActivityForResult(photoPickerIntent, PICK_IMAGE);
-            }
-        });
     }
 
     public String getPath(Uri uri) {

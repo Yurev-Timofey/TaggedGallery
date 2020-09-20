@@ -1,25 +1,67 @@
-<android.widget.LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical">
-<!--    tools:context="ImagePickerActivity"-->
+    android:layout_height="fill_parent">
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+<!--        <EditText-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:id="@+id/etName"-->
+<!--            android:fadeScrollbars="true">-->
+<!--        </EditText>-->
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create"
+            android:id="@+id/btnCreate">
+        </Button>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clear"
+            android:id="@+id/btnClear">
+        </Button>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/llPictures"
+        android:orientation="vertical">
+    </LinearLayout>
+</LinearLayout>
+
+    <!--<android.widget.LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    xmlns:tools="http://schemas.android.com/tools"-->
+    <!--    android:layout_width="fill_parent"-->
+    <!--    android:layout_height="fill_parent"-->
+    <!--    android:orientation="vertical">-->
+    <!--&lt;!&ndash;    tools:context="ImagePickerActivity"&ndash;&gt;-->
 
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:maxHeight="200dp"
-        android:layout_gravity="center"/>
-<!--        android:src="@drawable/ic_launcher" -->
+    <!--    &lt;!&ndash;        android:src="@drawable/ic_launcher" &ndash;&gt;-->
 
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:text="Выбрать изображение" />
-</android.widget.LinearLayout>
+    <!--    <ImageView-->
+    <!--        android:id="@+id/imageView"-->
+    <!--        android:layout_width="118dp"-->
+    <!--        android:layout_height="113dp"-->
+    <!--        android:layout_gravity="center"-->
+    <!--        android:maxHeight="200dp" />-->
+
+    <!--    <Button-->
+    <!--        android:id="@+id/button"-->
+    <!--        android:layout_width="fill_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_gravity="center"-->
+    <!--        android:layout_marginTop="20dp"-->
+    <!--        android:text="Выбрать изображение" />-->
+    <!--</android.widget.LinearLayout>-->
+
+
