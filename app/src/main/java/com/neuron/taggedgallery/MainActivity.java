@@ -1,6 +1,8 @@
 package com.neuron.taggedgallery;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.ContentValues;
 import android.content.Intent;
@@ -40,6 +42,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        RecyclerView recyclerView = findViewById(R.id.imagegallery);
+        recyclerView.setHasFixedSize(true);
+
+        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(),3);
+        recyclerView.setLayoutManager(layoutManager);
+
+        ArrayList<CreateList> createLists = prepareData();
+        Adapter adapter = new Adapter(getApplicationContext(), createLists);
+        recyclerView.setAdapter(adapter);
+
+
 
         llMain = findViewById(R.id.llPictures);
 

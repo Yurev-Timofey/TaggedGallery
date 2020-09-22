@@ -9,13 +9,6 @@
         android:layout_width="match_parent"
         android:orientation="horizontal"
         android:layout_height="wrap_content">
-<!--        <EditText-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_weight="1"-->
-<!--            android:id="@+id/etName"-->
-<!--            android:fadeScrollbars="true">-->
-<!--        </EditText>-->
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,39 +22,9 @@
             android:id="@+id/btnClear">
         </Button>
     </LinearLayout>
-    <LinearLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/imagegallery"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/llPictures"
-        android:orientation="vertical">
-    </LinearLayout>
+        />
 </LinearLayout>
-
-    <!--<android.widget.LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--    xmlns:tools="http://schemas.android.com/tools"-->
-    <!--    android:layout_width="fill_parent"-->
-    <!--    android:layout_height="fill_parent"-->
-    <!--    android:orientation="vertical">-->
-    <!--&lt;!&ndash;    tools:context="ImagePickerActivity"&ndash;&gt;-->
-
-
-    <!--    &lt;!&ndash;        android:src="@drawable/ic_launcher" &ndash;&gt;-->
-
-
-    <!--    <ImageView-->
-    <!--        android:id="@+id/imageView"-->
-    <!--        android:layout_width="118dp"-->
-    <!--        android:layout_height="113dp"-->
-    <!--        android:layout_gravity="center"-->
-    <!--        android:maxHeight="200dp" />-->
-
-    <!--    <Button-->
-    <!--        android:id="@+id/button"-->
-    <!--        android:layout_width="fill_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_gravity="center"-->
-    <!--        android:layout_marginTop="20dp"-->
-    <!--        android:text="Выбрать изображение" />-->
-    <!--</android.widget.LinearLayout>-->
-
-
