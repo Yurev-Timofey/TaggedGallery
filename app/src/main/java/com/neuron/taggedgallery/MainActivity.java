@@ -22,6 +22,8 @@ import android.widget.Toast;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -36,35 +38,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ImageView lastImg;
 
     int wrapContent = LinearLayout.LayoutParams.WRAP_CONTENT;
-
+    List<Image> images = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        images.add(new Image("1", "1", R.drawable.testimg));
+        images.add(new Image("2", "2", R.drawable.testimg));
+        images.add(new Image("3", "3", R.drawable.testimg));
+
         RecyclerView recyclerView = findViewById(R.id.imagegallery);
-        recyclerView.setHasFixedSize(true);
-
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(),3);
-        recyclerView.setLayoutManager(layoutManager);
-
-        ArrayList<CreateList> createLists = prepareData();
-        Adapter adapter = new Adapter(getApplicationContext(), createLists);
+        // создаем адаптер
+        DataAdapter adapter = new DataAdapter(this, images);
+        // устанавливаем для списка адаптер
         recyclerView.setAdapter(adapter);
 
 
-
-        llMain = findViewById(R.id.llPictures);
-
-        btnCreate = findViewById(R.id.btnCreate);
-        btnCreate.setOnClickListener(this);
-
-        btnClear = findViewById(R.id.btnClear);
-        btnClear.setOnClickListener(this);
-
-        dbHelper = new DBHelper(this, "db");
-        database = dbHelper.getWritableDatabase();
+//        llMain = findViewById(R.id.llPictures);
+//
+//        btnCreate = findViewById(R.id.btnCreate);
+//        btnCreate.setOnClickListener(this);
+//
+//        btnClear = findViewById(R.id.btnClear);
+//        btnClear.setOnClickListener(this);
+//
+//        dbHelper = new DBHelper(this, "db");
+//        database = dbHelper.getWritableDatabase();
 
 //        Button PickImage = (Button) findViewById(R.id.button);
 //        PickImage.setOnClickListener(new View.OnClickListener() {
