@@ -1,6 +1,7 @@
 package com.neuron.taggedgallery;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,9 +9,8 @@ import android.widget.ImageView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.neuron.taggedgallery.Image;
-import com.neuron.taggedgallery.R;
-
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
@@ -32,7 +32,9 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(DataAdapter.ViewHolder holder, int position) {
         Image img = images.get(position);
-        holder.imageView.setImageResource(img.getImage());
+
+        holder.imageView.setImageURI(Uri.fromFile(new File(img.getImagePath())));
+        Uri.fromFile(new File(img.getImagePath()));
 //        holder.nameView.setText(img.getName());
 //        holder.companyView.setText(img.getCompany());
     }
@@ -40,6 +42,18 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return images.size();
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
+        notifyDataSetChanged();
+    }
+    public void addImage(Image image) {
+        if (images == null){
+            images = new ArrayList<>();
+        }
+        images.add(image);
+        notifyItemInserted(images.size()-1);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

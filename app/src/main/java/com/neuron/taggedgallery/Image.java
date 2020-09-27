@@ -3,12 +3,12 @@ package com.neuron.taggedgallery;
 public class Image {
     private String name;
     private String id;
-    private int image;
+    private String imagePath;
 
-    public Image(String name, String id, int image) {
+    public Image(String name, String id, String imagePath) {
         this.name = name;
         this.id = id;
-        this.image = image;
+        this.imagePath = imagePath;
     }
 
     public String getName() {
@@ -19,7 +19,7 @@ public class Image {
         return id;
     }
 
-    public int getImage() {
-        return image;
+    public String getImagePath() {
+        return imagePath;
     }
 }

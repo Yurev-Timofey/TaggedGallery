@@ -1,18 +1,24 @@
 package com.neuron.taggedgallery;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -32,7 +38,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     DBHelper dbHelper;
     SQLiteDatabase database;
 
-    LinearLayout llMain;
+    DataAdapter adapter;
+
+    //    LinearLayout llMain;
     Button btnCreate;
     Button btnClear;
     ImageView lastImg;
@@ -45,42 +53,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        images.add(new Image("1", "1", R.drawable.testimg));
-        images.add(new Image("2", "2", R.drawable.testimg));
-        images.add(new Image("3", "3", R.drawable.testimg));
-
-        RecyclerView recyclerView = findViewById(R.id.imagegallery);
-        // создаем адаптер
-        DataAdapter adapter = new DataAdapter(this, images);
-        // устанавливаем для списка адаптер
-        recyclerView.setAdapter(adapter);
-
+        requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, 123);
 
 //        llMain = findViewById(R.id.llPictures);
 //
-//        btnCreate = findViewById(R.id.btnCreate);
-//        btnCreate.setOnClickListener(this);
-//
-//        btnClear = findViewById(R.id.btnClear);
-//        btnClear.setOnClickListener(this);
-//
-//        dbHelper = new DBHelper(this, "db");
-//        database = dbHelper.getWritableDatabase();
+        btnCreate = findViewById(R.id.btnCreate);
+        btnCreate.setOnClickListener(this);
 
-//        Button PickImage = (Button) findViewById(R.id.button);
-//        PickImage.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-//
-//                //Вызываем стандартную галерею для выбора изображения с помощью Intent.ACTION_PICK:
-//                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-//                //Тип получаемых объектов - image:
-//                photoPickerIntent.setType("image/*");
-//                //Запускаем переход с ожиданием обратного результата в виде информации об изображении:
-//                startActivityForResult(photoPickerIntent, PICK_IMAGE);
-//            }
-//        });
+        btnClear = findViewById(R.id.btnClear);
+        btnClear.setOnClickListener(this);
+
+        dbHelper = new DBHelper(this, "db");
+        database = dbHelper.getWritableDatabase();
+
+//        images.add(new Image("1", "1", Uri.fromFile(Res));
+        Cursor cursor = database.query(DBHelper.TABLE_IMAGES, null, null, null,
+                null, null, null);
+        while (cursor.moveToNext()) {
+//            final Uri imageUri = Uri.parse(cursor.getString(cursor.getColumnIndex(DBHelper.KEY_URI)));
+//                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+//                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+            images.add(new Image("1", "1", cursor.getString(cursor.getColumnIndex(DBHelper.KEY_NAME))));
+        }
+        cursor.close();
+
+        RecyclerView recyclerView = findViewById(R.id.imagegallery);
+        // создаем адаптер
+        adapter = new DataAdapter(this, images);
+        // устанавливаем для списка адаптер
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                lParams.height = 150;
 
                 lastImg = new ImageView(this);
-                llMain.addView(lastImg, lParams);
+//                llMain.addView(lastImg, lParams);
 
                 //Вызываем стандартную галерею для выбора изображения с помощью Intent.ACTION_PICK:
                 Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
@@ -106,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.btnClear:
-                llMain.removeAllViews();
+//                llMain.removeAllViews();
                 dbHelper.onUpgrade(database, 1, 2);
                 Toast.makeText(this, "Удалено", Toast.LENGTH_SHORT).show();
                 break;
@@ -123,8 +124,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     ContentValues contentValues = new ContentValues();
 //                    System.out.println(data.getDataString());
-                    contentValues.put(DBHelper.KEY_PATH, getPath(data.getData()));
-                    contentValues.put(DBHelper.KEY_NAME, data.getDataString());
+                    contentValues.put(DBHelper.KEY_NAME,getRealPathFromURI(this, data.getData()));
+                    contentValues.put(DBHelper.KEY_URI, data.getDataString());
 
                     database.insert(DBHelper.TABLE_IMAGES, null, contentValues);
 
@@ -132,33 +133,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             null, null, null);
 
                     if (cursor.moveToLast()) {
-                        try {
-                            final Uri imageUri = Uri.parse(cursor.getString(cursor.getColumnIndex(DBHelper.KEY_NAME)));
-                            final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                            final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                            lastImg.setImageBitmap(selectedImage);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
+                        final Uri imageUri = Uri.parse(cursor.getString(cursor.getColumnIndex(DBHelper.KEY_URI))); //Убрат загрузку из бд
+                        adapter.addImage(new Image("1", "1", getRealPathFromURI(this, imageUri)));
                     }
                     cursor.close();
                 }
         }
     }
 
-    public String getPath(Uri uri) {
-        String[] projection = {MediaStore.Images.Media.DATA};
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        startManagingCursor(cursor);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
+    public String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        String path = "";
+        try {
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = context.getContentResolver().query(contentUri, proj, null,
+                    null, null);
+            int column_index =
+                    cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            path = cursor.getString(column_index);
+        } catch (Exception e) {
+            Log.e("gaga", "getRealPathFromURI Exception : " + e.toString());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        System.out.println(path);
+        return path;
     }
 
-//        Intent intent = new Intent();
-//        intent.setType("image/*");
-//        intent.setAction(Intent.ACTION_GET_CONTENT);
-//        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+    private void requestPermission(String permission, int requestCode) {
+        // запрашиваем разрешение
+        ActivityCompat.requestPermissions(this,
+                new String[]{permission}, requestCode);
+    }
 
 
 }
