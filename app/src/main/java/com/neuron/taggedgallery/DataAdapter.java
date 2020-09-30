@@ -35,8 +35,6 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
         holder.imageView.setImageURI(Uri.fromFile(new File(img.getImagePath())));
         Uri.fromFile(new File(img.getImagePath()));
-//        holder.nameView.setText(img.getName());
-//        holder.companyView.setText(img.getCompany());
     }
 
     @Override
@@ -48,6 +46,7 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         this.images = images;
         notifyDataSetChanged();
     }
+
     public void addImage(Image image) {
         if (images == null){
             images = new ArrayList<>();

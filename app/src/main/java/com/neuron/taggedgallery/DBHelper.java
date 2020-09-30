@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    public static final int DB_VERSION = 4;
+    public static int DB_VERSION = 1;
 
     public static final String TABLE_IMAGES = "images";
     public static final String TABLE_TAGS = "tags";
@@ -46,9 +46,8 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//        db.
-//        db.execSQL("DELETE FROM " + TABLE_IMAGES);
-//        db.execSQL("DELETE FROM " + TABLE_TAGS);
-//        db.execSQL("DELETE FROM " + TABLE_TAGMAP);
+        db.execSQL("DELETE FROM " + TABLE_IMAGES);
+        db.execSQL("DELETE FROM " + TABLE_TAGS);
+        db.execSQL("DELETE FROM " + TABLE_TAGMAP);
     }
 }

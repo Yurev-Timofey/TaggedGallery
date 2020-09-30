@@ -31,7 +31,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
 
     public static final int PICK_IMAGE = 1;
 
@@ -40,12 +40,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     DataAdapter adapter;
 
-    //    LinearLayout llMain;
     Button btnCreate;
     Button btnClear;
-    ImageView lastImg;
 
-    int wrapContent = LinearLayout.LayoutParams.WRAP_CONTENT;
     List<Image> images = new ArrayList<>();
 
     @Override
@@ -53,65 +50,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, 123);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 123);
 
-//        llMain = findViewById(R.id.llPictures);
-//
         btnCreate = findViewById(R.id.btnCreate);
-        btnCreate.setOnClickListener(this);
+        btnCreate.setOnClickListener(v -> {
+            //Вызываем стандартную галерею для выбора изображения с помощью Intent.ACTION_PICK:
+            Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+            //Тип получаемых объектов - image:
+            photoPickerIntent.setType("image/*");
+            //Запускаем переход с ожиданием обратного результата в виде информации об изображении:
+            startActivityForResult(photoPickerIntent, PICK_IMAGE);
+        });
 
         btnClear = findViewById(R.id.btnClear);
-        btnClear.setOnClickListener(this);
+        btnClear.setOnClickListener(v -> {
+            dbHelper.onUpgrade(database, DBHelper.DB_VERSION, ++DBHelper.DB_VERSION);
+            images.clear();
+            adapter.setImages(images);
+            Toast.makeText(MainActivity.super.getBaseContext(), "Удалено", Toast.LENGTH_SHORT).show(); //Не уверен насчет контекста
+        });
 
         dbHelper = new DBHelper(this, "db");
         database = dbHelper.getWritableDatabase();
 
-//        images.add(new Image("1", "1", Uri.fromFile(Res));
         Cursor cursor = database.query(DBHelper.TABLE_IMAGES, null, null, null,
                 null, null, null);
         while (cursor.moveToNext()) {
-//            final Uri imageUri = Uri.parse(cursor.getString(cursor.getColumnIndex(DBHelper.KEY_URI)));
-//                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-//                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
             images.add(new Image("1", "1", cursor.getString(cursor.getColumnIndex(DBHelper.KEY_NAME))));
         }
         cursor.close();
 
         RecyclerView recyclerView = findViewById(R.id.imagegallery);
-        // создаем адаптер
         adapter = new DataAdapter(this, images);
-        // устанавливаем для списка адаптер
         recyclerView.setAdapter(adapter);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btnCreate:
-                // Создание LayoutParams c шириной и высотой по содержимому
-                LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(
-                        300, 300);
-                lParams.gravity = Gravity.START;
-//                lParams.width = 150;
-//                lParams.height = 150;
-
-                lastImg = new ImageView(this);
-//                llMain.addView(lastImg, lParams);
-
-                //Вызываем стандартную галерею для выбора изображения с помощью Intent.ACTION_PICK:
-                Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-                //Тип получаемых объектов - image:
-                photoPickerIntent.setType("image/*");
-                //Запускаем переход с ожиданием обратного результата в виде информации об изображении:
-                startActivityForResult(photoPickerIntent, PICK_IMAGE);
-                break;
-
-            case R.id.btnClear:
-//                llMain.removeAllViews();
-                dbHelper.onUpgrade(database, 1, 2);
-                Toast.makeText(this, "Удалено", Toast.LENGTH_SHORT).show();
-                break;
-        }
     }
 
     @Override
@@ -124,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     ContentValues contentValues = new ContentValues();
 //                    System.out.println(data.getDataString());
-                    contentValues.put(DBHelper.KEY_NAME,getRealPathFromURI(this, data.getData()));
+                    contentValues.put(DBHelper.KEY_NAME, getRealPathFromURI(this, data.getData()));
                     contentValues.put(DBHelper.KEY_URI, data.getDataString());
 
                     database.insert(DBHelper.TABLE_IMAGES, null, contentValues);
@@ -141,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    //Не мой код
     public String getRealPathFromURI(Context context, Uri contentUri) {
         Cursor cursor = null;
         String path = "";
@@ -162,12 +134,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         System.out.println(path);
         return path;
     }
-
-    private void requestPermission(String permission, int requestCode) {
-        // запрашиваем разрешение
-        ActivityCompat.requestPermissions(this,
-                new String[]{permission}, requestCode);
-    }
-
-
 }
