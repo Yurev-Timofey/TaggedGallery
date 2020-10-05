@@ -82,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.imagegallery);
         adapter = new DataAdapter(this, images);
+//        adapter.setHasStableIds(true);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
         recyclerView.setAdapter(adapter);
     }
 

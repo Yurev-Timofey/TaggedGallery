@@ -34,6 +34,7 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         Image img = images.get(position);
 
         holder.imageView.setImageURI(Uri.fromFile(new File(img.getImagePath())));
+        holder.imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         Uri.fromFile(new File(img.getImagePath()));
     }
 
