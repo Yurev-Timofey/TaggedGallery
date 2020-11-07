@@ -6,34 +6,26 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.SearchManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.Toast;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final int PICK_IMAGE = 1;
+    public static final int PICK_IMAGE = 1;  //А зачем это? Хер знает..
 
     DBHelper dbHelper;
     SQLiteDatabase database;
@@ -42,8 +34,45 @@ public class MainActivity extends AppCompatActivity {
 
     Button btnCreate;
     Button btnClear;
+    SearchView searchView;
 
     List<Image> images = new ArrayList<>();
+
+    //Загрузка всех изображений из бд
+    public void loadAllPictures(){
+        images.clear();
+        Cursor cursor = database.query(DBHelper.TABLE_IMAGES, null, null, null,
+                null, null, null);
+        while (cursor.moveToNext()) {
+            images.add(new Image(cursor.getString(cursor.getColumnIndex(DBHelper.KEY_NAME)),
+                    cursor.getString(cursor.getColumnIndex(DBHelper.KEY_IMAGE_ID)),
+                    cursor.getString(cursor.getColumnIndex(DBHelper.KEY_PATH))));
+        }
+        cursor.close();
+        adapter.setImages(images);
+    }
+
+    //Не мой код
+    public String getRealPathFromURI(Context context, Uri contentUri) {
+        Cursor cursor = null;
+        String path = "";
+        try {
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = context.getContentResolver().query(contentUri, proj, null,
+                    null, null);
+            int column_index =
+                    cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            path = cursor.getString(column_index);
+        } catch (Exception e) {
+            Log.e("getPath", "getRealPathFromURI Exception : " + e.toString());
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return path;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,21 +99,44 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.super.getBaseContext(), "Удалено", Toast.LENGTH_SHORT).show(); //Не уверен насчет контекста
         });
 
+        searchView = findViewById(R.id.searchView1);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText.equals("")) {
+                    loadAllPictures();
+                    return false;
+                }
+
+                images.clear();
+                Cursor cursor = database.query(DBHelper.TABLE_IMAGES, null, DBHelper.KEY_IMAGE_ID + " = " + newText, null,
+                        null, null, null);
+                while (cursor.moveToNext()) {
+                    images.add(new Image(cursor.getString(cursor.getColumnIndex(DBHelper.KEY_NAME)),
+                            cursor.getString(cursor.getColumnIndex(DBHelper.KEY_IMAGE_ID)),
+                            cursor.getString(cursor.getColumnIndex(DBHelper.KEY_PATH))));
+                }
+                cursor.close();
+                adapter.setImages(images);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                System.out.println("HELLO THERE2");
+                return false;
+            }
+        });
+
         dbHelper = new DBHelper(this, "db");
         database = dbHelper.getWritableDatabase();
 
-        Cursor cursor = database.query(DBHelper.TABLE_IMAGES, null, null, null,
-                null, null, null);
-        while (cursor.moveToNext()) {
-            images.add(new Image("1", "1", cursor.getString(cursor.getColumnIndex(DBHelper.KEY_NAME))));
-        }
-        cursor.close();
-
         RecyclerView recyclerView = findViewById(R.id.imagegallery);
         adapter = new DataAdapter(this, images);
-//        adapter.setHasStableIds(true);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
         recyclerView.setAdapter(adapter);
+
+        loadAllPictures();
     }
 
     @Override
@@ -95,45 +147,21 @@ public class MainActivity extends AppCompatActivity {
             case PICK_IMAGE:
                 if (resultCode == RESULT_OK) {
 
+                    String path = getRealPathFromURI(this, data.getData());
                     ContentValues contentValues = new ContentValues();
-//                    System.out.println(data.getDataString());
-                    contentValues.put(DBHelper.KEY_NAME, getRealPathFromURI(this, data.getData()));
-                    contentValues.put(DBHelper.KEY_URI, data.getDataString());
+                    contentValues.put(DBHelper.KEY_NAME, "");
+                    contentValues.put(DBHelper.KEY_PATH, path);
 
                     database.insert(DBHelper.TABLE_IMAGES, null, contentValues);
 
                     Cursor cursor = database.query(DBHelper.TABLE_IMAGES, null, null, null,
                             null, null, null);
 
-                    if (cursor.moveToLast()) {
-                        final Uri imageUri = Uri.parse(cursor.getString(cursor.getColumnIndex(DBHelper.KEY_URI))); //Убрат загрузку из бд
-                        adapter.addImage(new Image("1", "1", getRealPathFromURI(this, imageUri)));
-                    }
+                    if (cursor.moveToLast())
+                        adapter.addImage(new Image("", "", path));
+
                     cursor.close();
                 }
         }
-    }
-
-    //Не мой код
-    public String getRealPathFromURI(Context context, Uri contentUri) {
-        Cursor cursor = null;
-        String path = "";
-        try {
-            String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = context.getContentResolver().query(contentUri, proj, null,
-                    null, null);
-            int column_index =
-                    cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            path = cursor.getString(column_index);
-        } catch (Exception e) {
-            Log.e("gaga", "getRealPathFromURI Exception : " + e.toString());
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-        System.out.println(path);
-        return path;
     }
 }

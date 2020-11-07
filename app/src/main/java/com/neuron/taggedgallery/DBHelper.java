@@ -19,7 +19,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String KEY_TAGMAP_ID = "tagmapId";
 
     public static final String KEY_NAME = "name";
-    public static final String KEY_URI = "uri";
+    public static final String KEY_PATH = "path";
 
     public DBHelper(@Nullable Context context, @Nullable String name) {
         super(context, name, null, DB_VERSION);
@@ -30,7 +30,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("create table " + TABLE_IMAGES + " (" +
                 KEY_IMAGE_ID + " INTEGER PRIMARY KEY," +
                 KEY_NAME + " TEXT," +
-                KEY_URI + " TEXT)");
+                KEY_PATH + " TEXT)");
 
         db.execSQL("create table " + TABLE_TAGS + " (" +
                 KEY_TAG_ID + " INTEGER PRIMARY KEY," +
@@ -42,7 +42,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 KEY_TAG_ID + " INTEGER," +
                 KEY_IMAGE_ID + " INTEGER)");
     }
-
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
